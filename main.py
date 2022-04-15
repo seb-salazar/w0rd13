@@ -29,7 +29,7 @@ def print_grid_and_words(area: int, unit: int, words_list: List[str]):
     # Colour the letters
     word = list(words_list[-1])
     for index, letter in enumerate(word):
-        if letter in partial_matches:
+        if letter in partial_matches and letter not in list(sum(exact_matches, ())):
             word[index] = bcolors.WARNING + letter + bcolors.ENDC
 
     for index, found_letter in exact_matches:
@@ -50,6 +50,20 @@ def print_grid_and_words(area: int, unit: int, words_list: List[str]):
     print(("+" + " - " * unit) * area + "+")
 
 
+def input_n_of_letters():
+    global n_letters_allowed
+    
+    try:
+        n_letters_allowed = int(input("Number of letters allowed: "))
+    except ValueError:
+        print(f"ERROR: Please input a valid integer number")
+        input_n_of_letters()
+
+    if n_letters_allowed < 5:
+        print(f"ERROR: The number of letters must be greater or equal than 5")
+        input_n_of_letters()
+
+
 def input_day_word():
     global n_letters_allowed, day_word, day_word_list, day_word_list_with_indexes
 
@@ -61,15 +75,24 @@ def input_day_word():
 
 
 def input_and_set():
-    global n_letters_allowed, user_word_list
+    global n_letters_allowed, user_word, user_word_list
 
-    user_word_list = list(str(input(f"Guess the {n_letters_allowed} letter word: ")).upper())
+    user_word = str(input(f"Guess the {n_letters_allowed} letter word: ")).upper()
+    user_word_list = list(user_word)
     run_validations()
     compare_and_yield_results()
 
 
 def run_validations():
-    global n_letters_allowed, day_word, day_word_list, user_word_list
+    global n_letters_allowed, day_word, day_word_list, user_word, user_word_list
+
+    if day_word and not day_word.isalpha():
+        print(f"ERROR: The word '{day_word}' is not valid word")
+        input_day_word()
+
+    if user_word and not user_word.isalpha():
+        print(f"ERROR: The word '{user_word}' is not a valid word")
+        input_and_set()
 
     if len(day_word_list) != n_letters_allowed:
         print(f"ERROR: The word '{day_word}' does not have the previously determined amount of letters ({n_letters_allowed})")
@@ -117,12 +140,14 @@ def compare_and_yield_results():
 if __name__ == "__main__":
     day_word = ""
     day_word_list = []
-    n_letters_allowed = int(input("Number of letters allowed: "))
+    n_letters_allowed = 0
     result_index_and_letters = []
+    user_word = ""
     user_word_list = []
     words_try_list = []
     day_word_list_with_indexes = []
     counter = 0
 
+    input_n_of_letters()
     input_day_word()
     input_and_set()
