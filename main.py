@@ -27,7 +27,6 @@ def select_random_word():
         words_list = list(reader)
 
     word = random.choice(words_list)[0]
-    print(word)
     return word
 
 
