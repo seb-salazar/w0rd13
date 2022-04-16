@@ -1,4 +1,9 @@
+import csv
+import random
+import sys
+
 from getpass import getpass
+from io import StringIO
 from typing import List, Tuple
 
 
@@ -14,9 +19,16 @@ class bcolors:
     ENDC = '\033[0m'
 
 
-def replace_str_at_position(string: str, new_character: str, position: int):
-    string = string[:position] + new_character + string[position+1:]
-    return string
+def select_random_word():
+    global n_letters_allowed
+
+    with open(f"./words/{n_letters_allowed}_letter_words.txt") as f:
+        reader = csv.reader(f)
+        words_list = list(reader)
+
+    word = random.choice(words_list)[0]
+    print(word)
+    return word
 
 
 def print_grid_and_words(area: int, unit: int, words_list: List[str]):
@@ -44,40 +56,77 @@ def print_grid_and_words(area: int, unit: int, words_list: List[str]):
 
         rows_to_print[index] = row_to_print
 
+    print("")
     for index, _ in enumerate(range(5)):
         print(("+" + " - " * unit) * area + "+")
         print(rows_to_print[index] + "|")
     print(("+" + " - " * unit) * area + "+")
 
 
+def select_game_mode():
+    global game_mode
+
+    allowed_modes = (1, 2)
+    try:
+        print("--- Select your Game Mode ---\n")
+        print("1 : SOLO mode (Guess the word from a random set of words)")
+        print("2 : VERSUS mode (Your oponent has to guess your secret word)")
+        print("\nSelect your game mode!")
+        game_mode = int(input("Type 1 or 2 and press ENTER: "))
+    except ValueError:
+        print(f"\n{bcolors.FAIL}ERROR{bcolors.ENDC}: Please input a valid integer number")
+        select_game_mode()
+
+    if game_mode not in allowed_modes:
+        print(f"\n{bcolors.FAIL}ERROR{bcolors.ENDC}: Please select a valide Game Mode")
+        select_game_mode()
+
+
+def play_again_query():
+    response = str(input("Play again? [y/n]: "))
+    print("")
+    if response == "y":
+        play_game()
+    elif response == "n":
+        exit()
+    else:
+        print(f"\n{bcolors.WARNING}Please input a valid response{bcolors.ENDC}")
+        play_again_query()
+
+
 def input_n_of_letters():
     global n_letters_allowed
     
     try:
-        n_letters_allowed = int(input("Number of letters allowed: "))
+        n_letters_allowed = int(input("\nNumber of letters allowed to play (>= 5): "))
     except ValueError:
-        print(f"ERROR: Please input a valid integer number")
+        print(f"\n{bcolors.FAIL}ERROR{bcolors.ENDC}: Please input a valid integer number")
         input_n_of_letters()
 
     if n_letters_allowed < 5:
-        print(f"ERROR: The number of letters must be greater or equal than 5")
+        print(f"\n{bcolors.FAIL}ERROR{bcolors.ENDC}: The number of letters must be greater or equal than 5")
         input_n_of_letters()
 
 
 def input_day_word():
-    global n_letters_allowed, day_word, day_word_list, day_word_list_with_indexes
+    global game_mode, n_letters_allowed, day_word, day_word_list, day_word_list_with_indexes
 
-    day_word = str(getpass("Day Word: " + "*" * n_letters_allowed)).upper()
-    day_word_list = list(day_word)
+    if game_mode == 1:
+        day_word = select_random_word().upper()
+        day_word_list = list(day_word)
+    else:
+        day_word = str(getpass("\nDay Word: " + "*" * n_letters_allowed)).upper()
+        day_word_list = list(day_word)
+
     run_validations()
     day_word_list_with_indexes = [(index, letter) for index, letter in enumerate(day_word_list)]
     input_and_set()
 
 
 def input_and_set():
-    global n_letters_allowed, user_word, user_word_list
+    global counter, n_letters_allowed, user_word, user_word_list
 
-    user_word = str(input(f"Guess the {n_letters_allowed} letter word: ")).upper()
+    user_word = str(input(f"\nGuess the {n_letters_allowed} letter word (try {counter + 1}/5): ")).upper()
     user_word_list = list(user_word)
     run_validations()
     compare_and_yield_results()
@@ -87,19 +136,19 @@ def run_validations():
     global n_letters_allowed, day_word, day_word_list, user_word, user_word_list
 
     if day_word and not day_word.isalpha():
-        print(f"ERROR: The word '{day_word}' is not valid word")
+        print(f"\n{bcolors.FAIL}ERROR{bcolors.ENDC}: The word '{day_word}' is not valid word")
         input_day_word()
 
     if user_word and not user_word.isalpha():
-        print(f"ERROR: The word '{user_word}' is not a valid word")
+        print(f"\n{bcolors.FAIL}ERROR{bcolors.ENDC}: The word '{user_word}' is not a valid word")
         input_and_set()
 
     if len(day_word_list) != n_letters_allowed:
-        print(f"ERROR: The word '{day_word}' does not have the previously determined amount of letters ({n_letters_allowed})")
+        print(f"\n{bcolors.FAIL}ERROR{bcolors.ENDC}: The word '{day_word}' does not have the previously determined amount of letters ({n_letters_allowed})")
         input_day_word()
 
     if len(user_word_list) and len(user_word_list) != n_letters_allowed:
-        print(f"ERROR: Word should be {n_letters_allowed} digits")
+        print(f"\n{bcolors.FAIL}ERROR{bcolors.ENDC}: Word should be {n_letters_allowed} digits")
         input_and_set()
 
 
@@ -127,17 +176,20 @@ def compare_and_yield_results():
     print_grid_and_words(n_letters_allowed, 1, words_try_list)
 
     if day_word == user_word:
-        print(f"You won! Congratulations! :D")
-        exit()
+        print(f"\nYou won! Congratulations! :D\n")
+        play_again_query()
 
     if counter == 5:
-        print(f"You lost :(\nThe actual word was {day_word}")
-        exit()
+        print(f"\nYou lost :(")
+        print(f"The actual word was {bcolors.UNDERLINE + day_word + bcolors.ENDC}\n")
+        play_again_query()
 
     input_and_set()
 
 
-if __name__ == "__main__":
+def play_game():
+    global day_word, day_word_list, n_letters_allowed, result_index_and_letters, user_word, user_word_list, words_try_list, day_word_list_with_indexes, counter, game_mode
+
     day_word = ""
     day_word_list = []
     n_letters_allowed = 0
@@ -147,7 +199,14 @@ if __name__ == "__main__":
     words_try_list = []
     day_word_list_with_indexes = []
     counter = 0
+    game_mode = 0
 
+    print("\n\n\n**** WELCOME TO W0RD13 (EN Version)****\n\n\n")
+
+    select_game_mode()
     input_n_of_letters()
     input_day_word()
     input_and_set()
+
+if __name__ == "__main__":
+    play_game()
