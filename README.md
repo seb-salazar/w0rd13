@@ -4,10 +4,7 @@
 
 <p float="left">
     <img src="readme_images/welcome.png" width="440" height="240">
-</p>
-
-<p float="left">
-    <img src="readme_images/try.png" width="300" height="330">
+    <img src="readme_images/try.png" width="235" height="240">
 </p>
 
 <p float="left">
