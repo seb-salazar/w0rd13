@@ -17,3 +17,6 @@
     <img src="readme_images/defeat.png" width="300" height="330">
     <img src="readme_images/victory.png" width="300" height="330">
 </p>
+
+### Acknowledgements
+Made with love for ***Pam*** by ***Seb*** :heart:
