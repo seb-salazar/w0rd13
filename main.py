@@ -1,9 +1,7 @@
 import csv
 import random
-import sys
 
 from getpass import getpass
-from io import StringIO
 from typing import List, Tuple
 
 
@@ -39,12 +37,19 @@ def print_grid_and_words(area: int, unit: int, words_list: List[str]):
 
     # Colour the letters
     word = list(words_list[-1])
-    for index, letter in enumerate(word):
-        if letter in partial_matches and letter not in list(sum(exact_matches, ())):
-            word[index] = bcolors.WARNING + letter + bcolors.ENDC
+    letters_ocurrences = {}
+    letters_colouring_counter = {letter : 0 for letter in user_word_list}
 
     for index, found_letter in exact_matches:
         word[index] = bcolors.OKGREEN + found_letter + bcolors.ENDC
+        letters_colouring_counter[found_letter] +=1
+
+    for index, letter in enumerate(word):
+        letters_ocurrences[letter] = day_word_list.count(letter)
+        if letter in partial_matches and letters_colouring_counter[letter] < letters_ocurrences[letter]:
+            user_word_list.count(letter)
+            word[index] = bcolors.WARNING + letter + bcolors.ENDC
+            letters_colouring_counter[letter] +=1
 
     words_list[-1] = word
     rows_to_print = [("|   ") * unit * area] * area
@@ -97,7 +102,7 @@ def input_n_of_letters():
     global n_letters_allowed
     
     try:
-        n_letters_allowed = int(input("\nNumber of letters allowed to play (>= 5): "))
+        n_letters_allowed = int(input("\nNumber of letters allowed to play (5, 6, 7 or 8): "))
     except ValueError:
         print(f"\n{bcolors.FAIL}ERROR{bcolors.ENDC}: Please input a valid integer number")
         input_n_of_letters()
