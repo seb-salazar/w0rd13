@@ -9,13 +9,13 @@
 3. Enjoy!
 
 <p float="left">
-    <img src="readme_images/landing.png" width="440" height="240">
-    <img src="readme_images/try.png" width="280" height="240">
+    <img src="readme_images/landing.png" width="720" height="360">
 </p>
 
 <p float="left">
-    <img src="readme_images/defeat.png" width="300" height="330">
-    <img src="readme_images/victory.png" width="300" height="330">
+    <img src="readme_images/try.png" width="280" height="240">
+    <img src="readme_images/defeat.png" width="240" height="240">
+    <img src="readme_images/victory.png" width="240" height="240">
 </p>
 
 ### Acknowledgements
