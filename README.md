@@ -2,6 +2,8 @@
 
 ## Python attempt of the cool word guessing game
 
+![alt text](https://github.com/seb-salazar/w0rd13/blob/main/readme_images/game.gif)
+
 ### How to play
 1. Open a terminal window
 2. `cd` to the project root folder
